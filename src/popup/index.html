@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Papr</title>
+    <link rel="stylesheet" href="./index.css" />
+  </head>
+  <body>
+    <div class="popup">
+
+      <!-- First-run banner — hidden until JS confirms it's needed -->
+      <div class="onboarding" id="onboarding" hidden>
+        <p class="onboarding__text">Toggle on above to apply a paper texture overlay. Adjust texture and intensity until reading feels right.</p>
+        <button class="onboarding__dismiss" id="onboarding-dismiss" aria-label="Dismiss">&#215;</button>
+      </div>
+
+      <header class="popup__header">
+        <span class="popup__title">papr</span>
+        <button
+          class="toggle"
+          id="toggle"
+          role="switch"
+          aria-checked="false"
+          aria-label="Enable paper overlay"
+        >
+          <span class="toggle__thumb"></span>
+        </button>
+      </header>
+
+      <div class="separator"></div>
+
+      <div class="controls" id="controls">
+
+        <section class="section">
+          <div class="section__label" id="texture-label">Texture</div>
+          <div
+            class="texture-picker"
+            id="texture-picker"
+            role="radiogroup"
+            aria-labelledby="texture-label"
+          >
+            <button class="texture-card texture-card--selected" data-texture="print-paper" role="radio" aria-checked="true">
+              <span class="texture-card__name">Print Paper</span>
+            </button>
+            <button class="texture-card" data-texture="woven-fabric" role="radio" aria-checked="false">
+              <span class="texture-card__name">Woven Fabric</span>
+            </button>
+            <button class="texture-card" data-texture="fine-press" role="radio" aria-checked="false">
+              <span class="texture-card__name">Fine Press</span>
+            </button>
+            <button class="texture-card" data-texture="aged-newsprint" role="radio" aria-checked="false">
+              <span class="texture-card__name">Aged Newsprint</span>
+            </button>
+            <button class="texture-card" data-texture="torinoko-washi" role="radio" aria-checked="false">
+              <span class="texture-card__name">Torinoko Washi</span>
+            </button>
+            <button class="texture-card" data-texture="parchment" role="radio" aria-checked="false">
+              <span class="texture-card__name">Parchment</span>
+            </button>
+          </div>
+        </section>
+
+        <section class="section section--last">
+          <div class="section__row">
+            <span class="section__label" id="intensity-label">Intensity</span>
+            <span class="section__value" id="intensity-value" aria-live="polite">22%</span>
+          </div>
+          <div class="slider-wrap">
+            <input
+              type="range"
+              id="intensity-slider"
+              class="slider"
+              min="15"
+              max="50"
+              value="22"
+              step="1"
+              aria-labelledby="intensity-label"
+              aria-valuemin="15"
+              aria-valuemax="50"
+              aria-valuenow="22"
+            />
+            <div class="slider-range" aria-hidden="true">
+              <span>15%</span>
+              <span>50%</span>
+            </div>
+          </div>
+        </section>
+
+      </div>
+
+    </div>
+    <script type="module" src="./index.ts"></script>
+  </body>
+</html>

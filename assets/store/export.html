@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Papr — Store Asset Export</title>
+  <style>
+    body {
+      background: #e8e0d4;
+      font-family: Georgia, serif;
+      padding: 48px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 64px;
+    }
+    .asset {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .asset-label {
+      font-size: 13px;
+      color: #9c7d5e;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .asset-instructions {
+      font-size: 13px;
+      color: #4a3728;
+      max-width: 480px;
+      line-height: 1.5;
+    }
+    .canvas {
+      display: block;
+      box-shadow: 0 4px 20px rgba(120,80,30,0.2);
+      overflow: hidden;
+    }
+  </style>
+</head>
+<body>
+
+  <h1 style="margin:0;font-size:28px;color:#4a3728;font-weight:700">
+    Papr — Chrome Web Store Assets
+  </h1>
+  <p style="margin:-48px 0 0;font-size:15px;color:#9c7d5e;max-width:560px;line-height:1.6">
+    Screenshot each asset below at its exact dimensions to produce a PNG for upload.
+    Use your OS screenshot tool or browser dev tools device emulation
+    (<kbd>F12</kbd> → device toolbar → set custom dimensions).
+    The paper grain texture uses CSS <code>mix-blend-mode</code> and requires a browser to render — SVG-to-PNG CLI tools will omit it.
+  </p>
+
+  <!-- App icon -->
+  <div class="asset">
+    <div class="asset-label">App icon — 128 × 128 px</div>
+    <div class="canvas" style="width:128px;height:128px">
+      <img src="icon-128.svg" width="128" height="128" alt="Papr app icon">
+    </div>
+    <p class="asset-instructions">
+      Also export at 48 × 48, 32 × 32, and 16 × 16 px for the extension manifest
+      (<code>icon-128.png</code>, <code>icon-48.png</code>, <code>icon-32.png</code>, <code>icon-16.png</code>).
+      Use an SVG-to-PNG tool or resize the screenshot.
+    </p>
+  </div>
+
+  <!-- Small promo tile -->
+  <div class="asset">
+    <div class="asset-label">Small promotional tile — 440 × 280 px</div>
+    <div class="canvas" style="width:440px;height:280px">
+      <img src="promo-440x280.svg" width="440" height="280" alt="Papr small promo tile">
+    </div>
+    <p class="asset-instructions">
+      Upload as the <strong>Small promotional tile</strong> in the Chrome Web Store
+      Developer Dashboard under Store Listing → Promotional images.
+    </p>
+  </div>
+
+  <!-- Large promo tile -->
+  <div class="asset">
+    <div class="asset-label">Large promotional tile — 920 × 680 px</div>
+    <div class="canvas" style="width:920px;height:680px">
+      <img src="promo-920x680.svg" width="920" height="680" alt="Papr large promo tile">
+    </div>
+    <p class="asset-instructions">
+      Upload as the <strong>Large promotional tile</strong> in the Chrome Web Store
+      Developer Dashboard under Store Listing → Promotional images.
+    </p>
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <defs>
+    <radialGradient id="highlight" cx="58%" cy="38%" r="65%">
+      <stop offset="0%" stop-color="rgba(255,255,255,0.12)"/>
+      <stop offset="100%" stop-color="rgba(0,0,0,0)"/>
+    </radialGradient>
+  </defs>
+  <!-- Amber background -->
+  <rect width="128" height="128" rx="22" fill="#c4924a"/>
+  <!-- Subtle highlight -->
+  <rect width="128" height="128" rx="22" fill="url(#highlight)"/>
+  <!-- Bottom layer: cream page -->
+  <rect x="20" y="37" width="60" height="62" rx="6" fill="#fdf8f2"/>
+  <!-- Top layer: semi-transparent overlay -->
+  <rect x="44" y="25" width="60" height="62" rx="6"
+        fill="rgba(255,255,255,0.38)"
+        stroke="rgba(255,255,255,0.65)" stroke-width="1.5"/>
+</svg>

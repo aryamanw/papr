@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Papr – paper texture for Chrome</title>
+  <meta name="description" content="Papr is a Chrome extension that lays a fine paper-like grain over every web page, so long reading is easier on your eyes." />
+  <meta name="theme-color" content="#fcfcfb" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#1a1a1a" media="(prefers-color-scheme: dark)" />
+  <link rel="icon" type="image/svg+xml" href="icon.svg" />
+  <meta property="og:title" content="Papr – paper texture for Chrome" />
+  <meta property="og:description" content="A fine paper-like grain over every web page. Easier on the eyes, all day long." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;0,7..72,700;1,7..72,400&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      /* The page is deliberately flat screen-white; the paper comes from the overlay. */
+      --screen: #fcfcfb;
+      --ink: #2a2420;
+      --ink-soft: #6b5a4a;
+      --amber: #c4924a;
+      --amber-hover: #a97938;
+      --amber-ink: #85591f;
+      --paper: #fdf8f2;
+      --rule: #e0cdb8;
+      --btn-text: #3a2a1a;
+      --shadow: rgba(120, 80, 30, 0.15);
+      --serif: 'Literata', Georgia, 'Times New Roman', serif;
+      --ui: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      color-scheme: light dark;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --screen: #1a1a1a;
+        --ink: #e8e0d4;
+        --ink-soft: #a0917e;
+        --amber: #d4a76a;
+        --amber-hover: #e0b87a;
+        --amber-ink: #e0b87a;
+        --paper: #242424;
+        --rule: #3d3530;
+        --shadow: rgba(0, 0, 0, 0.35);
+      }
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    html { -webkit-text-size-adjust: 100%; }
+
+    body {
+      margin: 0;
+      background: var(--screen);
+      color: var(--ink);
+      font-family: var(--serif);
+      font-size: 1.1875rem;
+      line-height: 1.65;
+      font-optical-sizing: auto;
+    }
+
+    a { color: var(--amber-ink); text-underline-offset: 0.18em; text-decoration-thickness: 1px; }
+    a:hover { text-decoration-thickness: 2px; }
+
+    :focus-visible { outline: 2px solid var(--amber); outline-offset: 3px; border-radius: 2px; }
+
+    .wrap { max-width: 68rem; margin: 0 auto; padding: 0 1.5rem; }
+
+    /* Header */
+    .site-header { display: flex; align-items: center; justify-content: space-between; padding-block: 1.5rem; }
+    .brand { display: inline-flex; align-items: center; gap: 0.6rem; color: var(--ink); text-decoration: none; font-weight: 700; font-size: 1.375rem; letter-spacing: -0.01em; }
+    .brand img { width: 26px; height: 31px; }
+    .site-header nav { display: flex; gap: 1.5rem; font-family: var(--ui); font-size: 0.9375rem; }
+    .site-header nav a { color: var(--ink-soft); text-decoration: none; }
+    .site-header nav a:hover { color: var(--ink); }
+
+    /* Page grid: reading column + the popup-style control panel */
+    .layout { display: grid; grid-template-columns: minmax(0, 38rem) 17.5rem; justify-content: space-between; gap: 3rem; padding-block: 3.5rem 5rem; }
+    .panel-slot { grid-column: 2; grid-row: 1 / span 2; }
+    .panel { position: sticky; top: 1.5rem; }
+
+    h1 { font-size: clamp(2.5rem, 6vw, 3.75rem); line-height: 1.05; letter-spacing: -0.025em; font-weight: 700; margin: 0 0 1.5rem; text-wrap: balance; }
+    .lede { font-size: 1.3125rem; line-height: 1.55; color: var(--ink-soft); margin: 0 0 2rem; max-width: 34em; }
+
+    .cta { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem 1.5rem; font-family: var(--ui); }
+    .button { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1.25rem; border-radius: 8px; background: var(--amber); color: var(--btn-text); font-weight: 600; font-size: 1rem; text-decoration: none; }
+    .button:hover { background: var(--amber-hover); text-decoration: none; }
+    .cta small { color: var(--ink-soft); font-size: 0.875rem; }
+
+    h2 { font-size: 1.75rem; line-height: 1.2; letter-spacing: -0.015em; margin: 4.5rem 0 1rem; font-weight: 600; }
+    p { margin: 0 0 1.1rem; }
+
+    dl { margin: 1.5rem 0 0; }
+    dt { font-weight: 600; margin-top: 1.25rem; }
+    dd { margin: 0.15rem 0 0; color: var(--ink-soft); }
+    .texture-names { font-style: italic; }
+
+    ol.steps { margin: 1.5rem 0 0; padding: 0; list-style: none; counter-reset: step; }
+    ol.steps li { counter-increment: step; position: relative; padding-left: 2.75rem; margin-bottom: 1rem; }
+    ol.steps li::before { content: counter(step); position: absolute; left: 0; top: 0.1rem; width: 1.75rem; height: 1.75rem; border-radius: 50%; border: 1px solid var(--rule); display: grid; place-items: center; font-family: var(--ui); font-size: 0.8125rem; font-weight: 600; color: var(--ink-soft); }
+    code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.85em; background: var(--paper); border: 1px solid var(--rule); padding: 0.05em 0.35em; border-radius: 4px; }
+
+    .site-footer { border-top: 1px solid var(--rule); padding-block: 2rem 3rem; font-family: var(--ui); font-size: 0.875rem; color: var(--ink-soft); display: flex; flex-wrap: wrap; gap: 0.5rem 2rem; justify-content: space-between; }
+    .site-footer a { color: inherit; }
+
+    /* Control panel – mirrors the extension popup */
+    .popup { background: var(--paper); border: 1px solid var(--rule); border-radius: 12px; box-shadow: 0 10px 30px -12px var(--shadow); font-family: var(--ui); font-size: 0.875rem; color: var(--ink); overflow: hidden; }
+    .popup__header { display: flex; align-items: center; justify-content: space-between; padding: 0.875rem 1rem; border-bottom: 1px solid var(--rule); }
+    .popup__title { font-family: var(--serif); font-weight: 600; font-size: 1.125rem; }
+    .popup__body { padding: 1rem; }
+    .popup__hint { margin: 0 0 0.25rem; color: var(--ink-soft); font-size: 0.8125rem; line-height: 1.45; }
+    .popup__section + .popup__section { margin-top: 1rem; }
+    .popup__label { display: flex; justify-content: space-between; color: var(--ink-soft); font-size: 0.8125rem; margin-bottom: 0.5rem; }
+    .popup__label output { color: var(--ink); font-variant-numeric: tabular-nums; }
+    .popup[data-enabled="false"] .popup__controls { opacity: 0.55; }
+
+    .switch { position: relative; width: 44px; height: 26px; border-radius: 13px; border: 0; padding: 0; background: var(--rule); cursor: pointer; transition: background-color 160ms ease; }
+    .switch::after { content: ''; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: #fefcf8; box-shadow: 0 1px 2px rgba(0,0,0,.2); transition: transform 160ms ease; }
+    .switch[aria-checked="true"] { background: var(--amber); }
+    .switch[aria-checked="true"]::after { transform: translateX(18px); }
+
+    .textures { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+    .texture { display: flex; flex-direction: column; gap: 0.35rem; padding: 0.4rem; border: 1px solid var(--rule); border-radius: 8px; background: transparent; color: var(--ink); font: inherit; font-size: 0.75rem; text-align: left; cursor: pointer; }
+    .texture svg { display: block; width: 100%; height: 34px; border-radius: 4px; background: #fdf8f2; }
+    .texture svg rect { opacity: 0.45; mix-blend-mode: multiply; }
+    .texture[aria-checked="true"] { border-color: var(--amber); box-shadow: inset 0 0 0 1px var(--amber); }
+
+    input[type="range"] { width: 100%; accent-color: var(--amber); margin: 0; }
+
+    /* The overlay, exactly as the extension injects it */
+    #papr-overlay { position: fixed; inset: 0; z-index: 2147483647; pointer-events: none; mix-blend-mode: multiply; opacity: 0; transition: opacity 400ms ease; }
+    #papr-overlay svg { width: 100%; height: 100%; }
+    @media (prefers-color-scheme: dark) { #papr-overlay { mix-blend-mode: screen; } }
+
+    @media (prefers-reduced-motion: reduce) {
+      #papr-overlay, .switch, .switch::after { transition: none; }
+    }
+
+    @media (max-width: 860px) {
+      .layout { grid-template-columns: minmax(0, 1fr); gap: 0; padding-top: 2rem; }
+      .panel-slot { grid-column: auto; grid-row: auto; margin-top: 2.5rem; }
+      .panel { position: static; max-width: 22rem; }
+    }
+
+    @media (max-width: 480px) {
+      .wrap { padding: 0 1rem; }
+      body { font-size: 1.0625rem; }
+      .site-header nav { gap: 1rem; }
+      h2 { margin-top: 3.5rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="site-header">
+      <a class="brand" href="./"><img src="icon.svg" alt="" width="26" height="31" />Papr</a>
+      <nav aria-label="Main">
+        <a href="#install">Install</a>
+        <a href="https://github.com/aryamanw/papr">GitHub</a>
+      </nav>
+    </header>
+
+    <div class="layout">
+      <section class="hero">
+        <h1>Make every web page read like paper.</h1>
+        <p class="lede">Papr is a Chrome extension that lays a fine matte grain over the pages you read. Text stays sharp, and the flat glare of a white screen goes quiet. Try it on this page first.</p>
+        <div class="cta">
+          <a class="button" href="https://github.com/aryamanw/papr/releases/latest">Download Papr 1.2.5</a>
+          <small>Free and open source, for Chrome</small>
+        </div>
+      </section>
+
+      <aside class="panel-slot" aria-label="Try Papr on this page">
+        <div class="panel">
+          <div class="popup" id="popup" data-enabled="false">
+            <div class="popup__header">
+              <span class="popup__title">papr</span>
+              <button class="switch" id="toggle" role="switch" aria-checked="false" aria-label="Apply paper texture to this page"></button>
+            </div>
+            <div class="popup__body">
+              <p class="popup__hint" id="hint">This works like the extension's popup. Switch it on to texture this page.</p>
+              <div class="popup__controls">
+                <div class="popup__section">
+                  <div class="popup__label" id="texture-label">Texture</div>
+                  <div class="textures" id="textures" role="radiogroup" aria-labelledby="texture-label"></div>
+                </div>
+                <div class="popup__section">
+                  <label class="popup__label" for="intensity">Intensity <output id="intensity-value" for="intensity">22%</output></label>
+                  <input type="range" id="intensity" min="15" max="50" step="1" value="22" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <article class="content">
+        <h2>How it works</h2>
+        <p>Papr draws one transparent layer over the whole page: a sheet of fine noise, the same kind of irregular grain you see on uncoated paper. It is blended into whatever sits underneath, so the texture settles into white backgrounds and fades out of dark text instead of covering it.</p>
+        <p>The layer never takes a click, a scroll or a text selection. Pages behave exactly as they did before. On dark pages, Papr switches how the grain blends so it lightens the background slightly instead of muddying it.</p>
+
+        <h2>What you can change</h2>
+        <dl>
+          <dt>Texture</dt>
+          <dd>Six papers: <span class="texture-names">Print Paper, Woven Fabric, Fine Press, Aged Newsprint, Torinoko Washi</span> and <span class="texture-names">Parchment</span>. Newsprint and Parchment also add a little warmth.</dd>
+          <dt>Intensity</dt>
+          <dd>From a barely-there 15% up to 50%. Most people settle around 20–25%.</dd>
+          <dt>On or off</dt>
+          <dd>One switch in the toolbar popup. Papr starts switched off, so nothing changes until you turn it on.</dd>
+        </dl>
+        <p style="margin-top:1.25rem">Your settings sync through your Chrome profile, so they follow you to other computers.</p>
+
+        <h2 id="install">Install</h2>
+        <p>Papr isn't in the Chrome Web Store yet, so you load it yourself. It takes about a minute.</p>
+        <ol class="steps">
+          <li>Download <code>papr-1.2.5.zip</code> from the <a href="https://github.com/aryamanw/papr/releases/latest">latest release</a>.</li>
+          <li>Unzip it to a folder you'll keep, since Chrome loads the extension from there.</li>
+          <li>Open <code>chrome://extensions</code> in Chrome.</li>
+          <li>Turn on <strong>Developer mode</strong> in the top-right corner.</li>
+          <li>Click <strong>Load unpacked</strong> and choose the unzipped folder.</li>
+        </ol>
+        <p>Pin Papr from the puzzle-piece menu so the switch is always one click away.</p>
+
+        <h2>What Papr can access</h2>
+        <p>Chrome will ask you to allow Papr on all sites, because it needs to draw the texture on every page you open. Papr doesn't read page content, and it makes no network requests at all. Its settings pages are locked down so that they can't send any.</p>
+        <p>It also uses Chrome's storage to remember your settings, and the tabs permission to update the texture on open tabs when you change something.</p>
+      </article>
+    </div>
+
+    <footer class="site-footer">
+      <span>Papr 1.2.5, MIT licensed</span>
+      <a href="https://github.com/aryamanw/papr">Source on GitHub</a>
+    </footer>
+  </div>
+
+  <div id="papr-overlay" aria-hidden="true"></div>
+
+  <script>
+    // Filters copied from src/content/textures.ts so the demo matches the extension.
+    const TEXTURES = {
+      'print-paper': { name: 'Print Paper', filter: '<feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" seed="2" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/>' },
+      'woven-fabric': { name: 'Woven Fabric', filter: '<feTurbulence type="turbulence" baseFrequency="0.9" numOctaves="2" seed="5" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/>' },
+      'fine-press': { name: 'Fine Press', filter: '<feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="4" seed="12" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/>' },
+      'aged-newsprint': {
+        name: 'Aged Newsprint',
+        filter: '<feTurbulence type="fractalNoise" baseFrequency="0.45" numOctaves="3" seed="7" stitchTiles="stitch" result="noise"/><feColorMatrix type="matrix" in="noise" values="0.9 0.1 0 0 0.08 0.7 0.8 0.1 0 0.04 0.5 0.1 0.5 0 0 0 0 0 1 0"/>',
+        dark: '<feTurbulence type="fractalNoise" baseFrequency="0.45" numOctaves="3" seed="7" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/>',
+      },
+      'torinoko-washi': { name: 'Torinoko Washi', filter: '<feTurbulence type="fractalNoise" baseFrequency="0.6 0.15" numOctaves="4" seed="11" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/>' },
+      'parchment': {
+        name: 'Parchment',
+        filter: '<feTurbulence type="fractalNoise" baseFrequency="0.35" numOctaves="3" seed="19" stitchTiles="stitch" result="noise"/><feColorMatrix type="matrix" in="noise" values="1.0 0.2 0 0 0.14 0.6 0.9 0.1 0 0.06 0.3 0.1 0.4 0 0 0 0 0 1 0"/>',
+        dark: '<feTurbulence type="fractalNoise" baseFrequency="0.35" numOctaves="3" seed="19" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/>',
+      },
+    };
+    const STORAGE_KEY = 'papr-site-demo';
+    const darkQuery = matchMedia('(prefers-color-scheme: dark)');
+
+    const state = { enabled: false, texture: 'print-paper', intensity: 22 };
+    try {
+      Object.assign(state, JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'));
+    } catch {}
+    if (!TEXTURES[state.texture]) state.texture = 'print-paper';
+    state.intensity = Math.min(50, Math.max(15, Number(state.intensity) || 22));
+
+    const overlay = document.getElementById('papr-overlay');
+    const popup = document.getElementById('popup');
+    const toggle = document.getElementById('toggle');
+    const hint = document.getElementById('hint');
+    const slider = document.getElementById('intensity');
+    const intensityValue = document.getElementById('intensity-value');
+    const texturePicker = document.getElementById('textures');
+
+    const svg = (id, filter) => `<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs><filter id="${id}">${filter}</filter></defs><rect width="100%" height="100%" filter="url(#${id})"/></svg>`;
+
+    for (const [key, { name, filter }] of Object.entries(TEXTURES)) {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'texture';
+      button.dataset.texture = key;
+      button.setAttribute('role', 'radio');
+      button.innerHTML = `${svg(`swatch-${key}`, filter)}<span>${name}</span>`;
+      button.addEventListener('click', () => update({ texture: key }));
+      texturePicker.append(button);
+    }
+
+    // Arrow keys move between textures, like a native radio group.
+    texturePicker.addEventListener('keydown', (event) => {
+      const keys = Object.keys(TEXTURES);
+      const step = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[event.key];
+      if (!step) return;
+      event.preventDefault();
+      const next = keys[(keys.indexOf(state.texture) + step + keys.length) % keys.length];
+      update({ texture: next });
+      texturePicker.querySelector(`[data-texture="${next}"]`).focus();
+    });
+
+    function renderOverlay() {
+      const texture = TEXTURES[state.texture];
+      overlay.innerHTML = svg('papr-f', (darkQuery.matches && texture.dark) || texture.filter);
+    }
+
+    function render() {
+      toggle.setAttribute('aria-checked', String(state.enabled));
+      popup.dataset.enabled = String(state.enabled);
+      hint.textContent = state.enabled
+        ? 'Papr is on for this page. Pick a texture and adjust the intensity.'
+        : "This works like the extension's popup. Switch it on to texture this page.";
+      for (const button of texturePicker.children) {
+        const selected = button.dataset.texture === state.texture;
+        button.setAttribute('aria-checked', String(selected));
+        button.tabIndex = selected ? 0 : -1;
+      }
+      slider.value = state.intensity;
+      intensityValue.textContent = `${state.intensity}%`;
+      overlay.style.opacity = state.enabled ? String(state.intensity / 100) : '0';
+    }
+
+    function update(changes) {
+      const textureChanged = changes.texture && changes.texture !== state.texture;
+      // Picking a texture or intensity while off turns Papr on, so the change is visible.
+      Object.assign(state, { enabled: true }, changes);
+      if (textureChanged) renderOverlay();
+      render();
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch {}
+    }
+
+    toggle.addEventListener('click', () => update({ enabled: !state.enabled }));
+    slider.addEventListener('input', () => update({ intensity: Number(slider.value) }));
+    darkQuery.addEventListener('change', renderOverlay);
+
+    renderOverlay();
+    render();
+  </script>
+</body>
+</html>
